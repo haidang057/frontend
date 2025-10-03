@@ -9,56 +9,12 @@ const clearAllBtn = document.getElementById("clearAllBtn");
 
 let todos = [];
 
-// Cập nhật hiển thị số task
+// Cập nhật số task
 function updateInfo() {
   taskInfo.innerText = `You have ${todos.length} pending tasks`;
 }
 
-// Thêm todo
-function addTodo() {
-  const todoText = todoInput.value.trim();
-  if (todoText === "") {
-    errorMsg.textContent = "Please enter a todo!";
-    return;
-  }
-
-  if (todos.includes(todoText.toLowerCase())) {
-    errorMsg.textContent = "Todo already existed!";
-    return;
-  }
-
-  todos.push(todoText.toLowerCase());
-  renderTodos();
-  todoInput.value = "";
-  errorMsg.textContent = "";
-}
-
-// Xóa 1 todo
-function deleteTodo(index) {
-  todos.splice(index, 1);
-  renderTodos();
-}
-
-// Xóa tất cả
-function clearAll() {
-  todos = [];
-  renderTodos();
-}
-
-// Search todo
-function searchTodo() {
-  const keyword = searchInput.value.trim().toLowerCase();
-  const items = todoList.querySelectorAll("li");
-  items.forEach(li => {
-    if (li.dataset.text.includes(keyword)) {
-      li.style.display = "flex";
-    } else {
-      li.style.display = "none";
-    }
-  });
-}
-
-// Render todo list
+// Render danh sách todos
 function renderTodos() {
   todoList.innerHTML = "";
   todos.forEach((todo, index) => {
@@ -72,9 +28,7 @@ function renderTodos() {
     `;
 
     // Drag event
-    li.addEventListener("dragstart", () => {
-      li.classList.add("dragging");
-    });
+    li.addEventListener("dragstart", () => li.classList.add("dragging"));
     li.addEventListener("dragend", () => {
       li.classList.remove("dragging");
       reorderTodos();
@@ -85,7 +39,66 @@ function renderTodos() {
   updateInfo();
 }
 
-// Drag & Drop reorder
+// Thêm todo
+function addTodo() {
+  const todoText = todoInput.value.trim();
+  if (todoText === "") {
+    errorMsg.textContent = "Please enter a todo!";
+    todoInput.value = "";
+    return;
+  }
+
+  if (todos.includes(todoText.toLowerCase())) {
+    errorMsg.textContent = "Todo already existed!";
+    todoInput.value = "";
+    return;
+  }
+
+  todos.push(todoText.toLowerCase());
+  renderTodos();
+  todoInput.value = "";
+  errorMsg.textContent = "";
+}
+
+// Xóa todo
+function deleteTodo(index) {
+  todos.splice(index, 1);
+  renderTodos();
+  errorMsg.textContent = ""; // clear báo lỗi
+}
+
+// Clear tất cả
+function clearAll() {
+  todos = [];
+  renderTodos();
+  errorMsg.textContent = ""; // clear báo lỗi
+}
+
+// Search todo
+function searchTodo() {
+  const keyword = searchInput.value.trim().toLowerCase();
+  const items = todoList.querySelectorAll("li");
+
+  items.forEach(li => {
+    if (li.dataset.text.includes(keyword)) {
+      li.style.display = "flex";
+    } else {
+      li.style.display = "none";
+    }
+  });
+
+  searchInput.value = "";
+  errorMsg.textContent = ""; // clear báo lỗi khi search
+}
+
+// Reorder sau khi drag
+function reorderTodos() {
+  const items = todoList.querySelectorAll("li");
+  todos = Array.from(items).map(li => li.dataset.text);
+  updateInfo();
+}
+
+// Dragover event
 todoList.addEventListener("dragover", e => {
   e.preventDefault();
   const dragging = document.querySelector(".dragging");
@@ -108,12 +121,6 @@ function getDragAfterElement(container, y) {
       return closest;
     }
   }, { offset: Number.NEGATIVE_INFINITY }).element;
-}
-
-function reorderTodos() {
-  const items = todoList.querySelectorAll("li");
-  todos = Array.from(items).map(li => li.dataset.text);
-  updateInfo();
 }
 
 // Gắn sự kiện
